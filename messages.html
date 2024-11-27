@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>View Messages</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .message-list {
+            margin-top: 20px;
+        }
+        .message-item {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            word-wrap: break-word;
+            position: relative;
+        }
+        .message-text {
+            white-space: pre-wrap;
+            margin-bottom: 10px;
+        }
+        .message-timestamp {
+            color: #888;
+            font-size: 0.8em;
+        }
+        .copy-btn, #deleteAllBtn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.8em;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+        .copy-btn:hover, #deleteAllBtn:hover {
+            background-color: #45a049;
+        }
+        #deleteAllBtn {
+            background-color: #f44336;
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+        }
+        #deleteAllBtn:hover {
+            background-color: #d32f2f;
+        }
+        #backBtn {
+            width: 100%;
+            padding: 10px;
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        #noMessages {
+            text-align: center;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button id="backBtn">Back to Send Message</button>
+        <button id="deleteAllBtn">Delete All Messages</button>
+        <h2>Sent Messages</h2>
+        <div id="messageList" class="message-list"></div>
+    </div>
+
+    <script>
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbxhW-MxvQi3g39M3SLIqNX1ak0tvgAzsvGAxvNqObyjz25uq0XkJFtel4kUiNzrRNJn/exec';
+        const messageList = document.getElementById('messageList');
+        const backBtn = document.getElementById('backBtn');
+        const deleteAllBtn = document.getElementById('deleteAllBtn');
+
+        // Function to copy message to clipboard
+        function copyMessage(messageText) {
+            navigator.clipboard.writeText(messageText).then(() => {
+                alert('Message copied to clipboard!');
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+                alert('Failed to copy message.');
+            });
+        }
+
+        // Function to delete all messages
+        async function deleteAllMessages() {
+            const confirmDelete = confirm('Are you sure you want to delete ALL messages? This action cannot be undone.');
+            
+            if (confirmDelete) {
+                try {
+                    const response = await fetch(`${scriptURL}?action=deleteAllMessages`);
+                    const result = await response.json();
+
+                    if (result.status === 'success') {
+                        alert('All messages deleted successfully!');
+                        messageList.innerHTML = '<p id="noMessages">No messages found.</p>';
+                    } else {
+                        alert('Failed to delete messages. Please try again.');
+                    }
+                } catch (error) {
+                    console.error('Error deleting messages:', error);
+                    alert('Error deleting messages. Please try again.');
+                }
+            }
+        }
+
+        // Function to fetch and display messages
+        async function fetchMessages() {
+            try {
+                const response = await fetch(`${scriptURL}?action=getMessages`);
+                const data = await response.json();
+
+                if (!data || data.length === 0) {
+                    messageList.innerHTML = '<p id="noMessages">No messages found.</p>';
+                    return;
+                }
+
+                // Clear previous messages
+                messageList.innerHTML = '';
+
+                // Reverse to show newest first
+                data.reverse().forEach((message) => {
+                    const messageDiv = document.createElement('div');
+                    messageDiv.classList.add('message-item');
+                    
+                    // Create copy button
+                    const copyButton = document.createElement('button');
+                    copyButton.textContent = 'Copy';
+                    copyButton.classList.add('copy-btn');
+                    copyButton.addEventListener('click', () => copyMessage(message.message));
+
+                    // Create separate elements for message and timestamp
+                    const messageText = document.createElement('div');
+                    messageText.classList.add('message-text');
+                    messageText.textContent = message.message;
+
+                    const timestampDiv = document.createElement('div');
+                    timestampDiv.classList.add('message-timestamp');
+                    timestampDiv.textContent = `Sent: ${message.timestamp}`;
+
+                    // Append elements to message div
+                    messageDiv.appendChild(copyButton);
+                    messageDiv.appendChild(messageText);
+                    messageDiv.appendChild(timestampDiv);
+
+                    // Append to message list
+                    messageList.appendChild(messageDiv);
+                });
+            } catch (error) {
+                console.error('Error fetching messages:', error);
+                messageList.innerHTML = '<p id="noMessages">Error loading messages. Please try again.</p>';
+            }
+        }
+
+        // Back to send message page
+        backBtn.addEventListener('click', () => {
+            window.location.href = 'index.html';
+        });
+
+        // Add event listener for delete all button
+        deleteAllBtn.addEventListener('click', deleteAllMessages);
+
+        // Fetch messages on page load
+        fetchMessages();
+    </script>
+</body>
+</html>

@@ -2,63 +2,92 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Send Message to Sheet</title>
     <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
         body {
-            font-family: Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background-color: #f4f4f4;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #f0f0f0;
+            min-height: 100vh;
+            padding: 15px;
         }
         .container {
             background-color: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            width: 80%;
-            max-width: 600px;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 500px;
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
         }
         textarea {
             width: 100%;
-            height: 300px;
+            height: 250px;
             margin-bottom: 15px;
             padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
             resize: vertical;
+            font-size: 16px; /* Prevents zoom on mobile */
         }
         .btn {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             border: none;
-            border-radius: 5px;
+            border-radius: 8px;
             cursor: pointer;
-            margin-bottom: 10px;
+            font-size: 16px;
+            transition: background-color 0.2s;
         }
         #submitBtn {
             background-color: #4CAF50;
             color: white;
+            margin-bottom: 10px;
         }
         #viewMessagesBtn {
             background-color: #2196F3;
             color: white;
         }
+        #submitBtn:hover, #viewMessagesBtn:hover {
+            opacity: 0.9;
+        }
         #messageStatus {
             text-align: center;
             margin-top: 15px;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        #messageStatus.success {
+            background-color: #e7f6e7;
+            color: #2a6f2a;
+        }
+        #messageStatus.error {
+            background-color: #f6e7e7;
+            color: #6f2a2a;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <form id="messageForm">
-            <h2>Send Message to Google Sheet</h2>
-            <textarea id="messageInput" name="messageInput" placeholder="Enter your long message here..."></textarea>
+            <h2>Send Message</h2>
+            <textarea id="messageInput" name="messageInput" placeholder="Enter your message here..." required></textarea>
             <button type="submit" class="btn" id="submitBtn">Send Message</button>
-            <button type="button" class="btn" id="viewMessagesBtn">View all Messages</button>
+            <button type="button" class="btn" id="viewMessagesBtn">View Messages</button>
+            <div id="messageStatus"></div>
         </form>
-        <div id="messageStatus"></div>
     </div>
 
     <script>
@@ -74,7 +103,7 @@
             
             if (messageInput.value.trim() === '') {
                 messageStatus.textContent = 'Please enter a message';
-                messageStatus.style.color = 'red';
+                messageStatus.className = 'error';
                 return;
             }
 
@@ -89,13 +118,13 @@
             })
             .then(() => {
                 messageStatus.textContent = 'Message sent successfully!';
-                messageStatus.style.color = 'green';
+                messageStatus.className = 'success';
                 messageInput.value = '';
             })
             .catch(error => {
                 console.error('Error!', error.message);
                 messageStatus.textContent = 'Error sending message. Please try again.';
-                messageStatus.style.color = 'red';
+                messageStatus.className = 'error';
             })
             .finally(() => {
                 submitBtn.disabled = false;
@@ -103,7 +132,6 @@
             });
         });
 
-        // Redirect to messages page
         viewMessagesBtn.addEventListener('click', () => {
             window.location.href = 'messages.html';
         });

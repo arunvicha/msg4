@@ -56,13 +56,13 @@
             <h2>Send Message to Google Sheet</h2>
             <textarea id="messageInput" name="messageInput" placeholder="Enter your long message here..."></textarea>
             <button type="submit" class="btn" id="submitBtn">Send Message</button>
-            <button type="button" class="btn" id="viewMessagesBtn">View Messages</button>
+            <button type="button" class="btn" id="viewMessagesBtn">View all Messages</button>
         </form>
         <div id="messageStatus"></div>
     </div>
 
     <script>
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbxhW-MxvQi3g39M3SLIqNX1ak0tvgAzsvGAxvNqObyjz25uq0XkJFtel4kUiNzrRNJn/exec';
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbym31mTHmHCkzENZO11hV1VVJW6rnTSVrU2TugFEEyzw7C-8qZaGlUz6PPxnUiGDVvJ/exec';
         const form = document.getElementById('messageForm');
         const submitBtn = document.getElementById('submitBtn');
         const viewMessagesBtn = document.getElementById('viewMessagesBtn');

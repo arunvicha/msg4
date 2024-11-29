@@ -2,21 +2,44 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>View Messages</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
+        * {
+            box-sizing: border-box;
             margin: 0;
-            padding: 20px;
-            background-color: #f0f0f0;
+            padding: 0;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background-color: #f4f4f4;
+            padding: 15px;
         }
         .container {
             background-color: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
             max-width: 800px;
             margin: 0 auto;
+        }
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.2s;
+            margin-bottom: 15px;
+        }
+        #backBtn {
+            background-color: #2196F3;
+            color: white;
+        }
+        #deleteAllBtn {
+            background-color: #f44336;
+            color: white;
         }
         .message-list {
             margin-top: 20px;
@@ -25,20 +48,23 @@
             background-color: #f9f9f9;
             border: 1px solid #ddd;
             padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 5px;
-            word-wrap: break-word;
+            margin-bottom: 15px;
+            border-radius: 8px;
             position: relative;
         }
         .message-text {
             white-space: pre-wrap;
+            word-break: break-word;
             margin-bottom: 10px;
         }
         .message-timestamp {
             color: #888;
             font-size: 0.8em;
         }
-        .copy-btn, #deleteAllBtn {
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
             background-color: #4CAF50;
             color: white;
             border: none;
@@ -46,33 +72,6 @@
             border-radius: 3px;
             cursor: pointer;
             font-size: 0.8em;
-        }
-        .copy-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-        }
-        .copy-btn:hover, #deleteAllBtn:hover {
-            background-color: #45a049;
-        }
-        #deleteAllBtn {
-            background-color: #f44336;
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 20px;
-        }
-        #deleteAllBtn:hover {
-            background-color: #d32f2f;
-        }
-        #backBtn {
-            width: 100%;
-            padding: 10px;
-            background-color: #2196F3;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-bottom: 20px;
         }
         #noMessages {
             text-align: center;
@@ -82,19 +81,18 @@
 </head>
 <body>
     <div class="container">
-        <button id="backBtn">Back to Send Message</button>
-        <button id="deleteAllBtn">Delete All Messages</button>
+        <button id="backBtn" class="btn">Back to Send Message</button>
+        <button id="deleteAllBtn" class="btn">Delete All Messages</button>
         <h2>Sent Messages</h2>
         <div id="messageList" class="message-list"></div>
     </div>
 
     <script>
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbxhW-MxvQi3g39M3SLIqNX1ak0tvgAzsvGAxvNqObyjz25uq0XkJFtel4kUiNzrRNJn/exec';
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbym31mTHmHCkzENZO11hV1VVJW6rnTSVrU2TugFEEyzw7C-8qZaGlUz6PPxnUiGDVvJ/exec';
         const messageList = document.getElementById('messageList');
         const backBtn = document.getElementById('backBtn');
         const deleteAllBtn = document.getElementById('deleteAllBtn');
 
-        // Function to copy message to clipboard
         function copyMessage(messageText) {
             navigator.clipboard.writeText(messageText).then(() => {
                 alert('Message copied to clipboard!');
@@ -104,9 +102,8 @@
             });
         }
 
-        // Function to delete all messages
         async function deleteAllMessages() {
-            const confirmDelete = confirm('Are you sure you want to delete ALL messages? This action cannot be undone.');
+            const confirmDelete = confirm('Delete ALL messages? This cannot be undone.');
             
             if (confirmDelete) {
                 try {
@@ -126,7 +123,6 @@
             }
         }
 
-        // Function to fetch and display messages
         async function fetchMessages() {
             try {
                 const response = await fetch(`${scriptURL}?action=getMessages`);
@@ -137,21 +133,17 @@
                     return;
                 }
 
-                // Clear previous messages
                 messageList.innerHTML = '';
 
-                // Reverse to show newest first
                 data.reverse().forEach((message) => {
                     const messageDiv = document.createElement('div');
                     messageDiv.classList.add('message-item');
                     
-                    // Create copy button
                     const copyButton = document.createElement('button');
                     copyButton.textContent = 'Copy';
                     copyButton.classList.add('copy-btn');
                     copyButton.addEventListener('click', () => copyMessage(message.message));
 
-                    // Create separate elements for message and timestamp
                     const messageText = document.createElement('div');
                     messageText.classList.add('message-text');
                     messageText.textContent = message.message;
@@ -160,12 +152,10 @@
                     timestampDiv.classList.add('message-timestamp');
                     timestampDiv.textContent = `Sent: ${message.timestamp}`;
 
-                    // Append elements to message div
                     messageDiv.appendChild(copyButton);
                     messageDiv.appendChild(messageText);
                     messageDiv.appendChild(timestampDiv);
 
-                    // Append to message list
                     messageList.appendChild(messageDiv);
                 });
             } catch (error) {
@@ -174,15 +164,12 @@
             }
         }
 
-        // Back to send message page
         backBtn.addEventListener('click', () => {
             window.location.href = 'index.html';
         });
 
-        // Add event listener for delete all button
         deleteAllBtn.addEventListener('click', deleteAllMessages);
 
-        // Fetch messages on page load
         fetchMessages();
     </script>
 </body>
